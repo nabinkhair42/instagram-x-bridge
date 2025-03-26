@@ -1,0 +1,46 @@
+{
+  "name": "instagram-x-bridge",
+  "version": "1.0.0",
+  "description": "Service to fetch Instagram posts, summarize content, and post to X.com",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "lint": "eslint . --ext .ts",
+    "vercel-build": "npm run build"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^7.2.0",
+    "morgan": "^1.10.0",
+    "openai": "^4.89.1",
+    "twitter-api-v2": "^1.22.0",
+    "winston": "^3.17.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.17.27",
+    "@types/supertest": "^2.0.16",
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
+    "supertest": "^6.3.4",
+    "ts-jest": "^29.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
