@@ -1,0 +1,342 @@
+{
+  "info": {
+    "_postman_id": "a9f839cf-886e-4372-aa5d-dcd2bbead887",
+    "name": "Instagram to X.com Bridge API",
+    "description": "API collection for fetching Instagram posts, summarizing content, and posting to X.com (Twitter)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "36351642"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "instagramUsername",
+      "value": "bbcnews",
+      "type": "string"
+    },
+    {
+      "key": "capturedCaption",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "capturedImageUrl",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "summarizedText",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level pre-request script",
+          "// Set timestamp for requests that need it",
+          "pm.variables.set('timestamp', new Date().toISOString());",
+          "",
+          "// Log the current environment",
+          "console.log(`Using baseUrl: ${pm.variables.get('baseUrl')}`);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level test script",
+          "pm.test(\"Status code is 2xx\", function () {",
+          "    pm.response.to.be.success;",
+          "});",
+          "",
+          "pm.test(\"Response has the correct structure\", function () {",
+          "    const responseData = pm.response.json();",
+          "    pm.expect(responseData).to.be.an('object');",
+          "    pm.expect(responseData.success).to.exist;",
+          "    pm.expect(responseData.meta).to.be.an('object');",
+          "    pm.expect(responseData.meta.timestamp).to.exist;",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Instagram",
+      "item": [
+        {
+          "name": "Get Latest Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test if response is valid",
+                  "pm.test(\"Response has valid Instagram post data\", function () {",
+                  "    const responseData = pm.response.json();",
+                  "    ",
+                  "    pm.expect(responseData.success).to.be.true;",
+                  "    pm.expect(responseData.data).to.be.an('object');",
+                  "    pm.expect(responseData.data.caption).to.exist;",
+                  "    pm.expect(responseData.data.imageUrl).to.exist;",
+                  "    pm.expect(responseData.data.postUrl).to.exist;",
+                  "    ",
+                  "    // Store the caption and imageUrl for use in other requests",
+                  "    pm.collectionVariables.set('capturedCaption', responseData.data.caption);",
+                  "    pm.collectionVariables.set('capturedImageUrl', responseData.data.imageUrl);",
+                  "    ",
+                  "    console.log('Caption captured and stored in variable');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/instagram/latest?username={{instagramUsername}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "instagram", "latest"],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "{{instagramUsername}}",
+                  "description": "Instagram username to fetch posts from"
+                }
+              ]
+            },
+            "description": "Fetches the latest post from the specified Instagram account (defaults to the value in the instagramUsername variable)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "LLM",
+      "item": [
+        {
+          "name": "Summarize Post",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// If we have a captured caption, use it, otherwise use the example",
+                  "const capturedCaption = pm.collectionVariables.get('capturedCaption');",
+                  "",
+                  "if (!capturedCaption) {",
+                  "    console.log('No captured caption found. Using example text.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test if response is valid",
+                  "pm.test(\"Response has valid summary data\", function () {",
+                  "    const responseData = pm.response.json();",
+                  "    ",
+                  "    pm.expect(responseData.success).to.be.true;",
+                  "    pm.expect(responseData.data).to.be.an('object');",
+                  "    pm.expect(responseData.data.originalText).to.exist;",
+                  "    pm.expect(responseData.data.summary).to.exist;",
+                  "    pm.expect(responseData.data.characterCount).to.be.a('number');",
+                  "    ",
+                  "    // Store the summary for use in other requests",
+                  "    pm.collectionVariables.set('summarizedText', responseData.data.summary);",
+                  "    ",
+                  "    console.log('Summary captured and stored in variable');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"{{capturedCaption}}\",\n  \"maxLength\": 280\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/summarize",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "summarize"]
+            },
+            "description": "Summarizes the provided text (using the captured caption from the Instagram request) to fit within Twitter's character limit"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Twitter",
+      "item": [
+        {
+          "name": "Post to Twitter",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// If we have a summarized text, use it, otherwise use example",
+                  "const summarizedText = pm.collectionVariables.get('summarizedText');",
+                  "",
+                  "if (!summarizedText) {",
+                  "    console.log('No summarized text found. Using example text.');",
+                  "}",
+                  "",
+                  "// Generate a timestamp to make tweets unique if needed",
+                  "pm.environment.set('timestamp', new Date().toISOString());"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test if response is valid",
+                  "pm.test(\"Tweet was posted successfully\", function () {",
+                  "    const responseData = pm.response.json();",
+                  "    ",
+                  "    pm.expect(responseData.success).to.be.true;",
+                  "    pm.expect(responseData.data).to.be.an('object');",
+                  "    ",
+                  "    // Check if real tweet or mock",
+                  "    if (responseData.data.tweetId && responseData.data.tweetId.startsWith('mock-')) {",
+                  "        console.log('Mock tweet created - Twitter API not configured');",
+                  "    } else {",
+                  "        console.log('Real tweet posted with ID: ' + responseData.data.tweetId);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"{{summarizedText}}\",\n  \"imageUrl\": \"{{capturedImageUrl}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tweet",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tweet"]
+            },
+            "description": "Posts a tweet to X.com using the summarized text from the previous request and the image URL from the Instagram post"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Complete Workflow",
+      "item": [
+        {
+          "name": "Process Instagram to X.com",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// You can override the username directly in the request if needed",
+                  "console.log(`Using Instagram username: ${pm.collectionVariables.get('instagramUsername')}`);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test if the complete workflow was successful",
+                  "pm.test(\"Complete workflow executed successfully\", function () {",
+                  "    const responseData = pm.response.json();",
+                  "    ",
+                  "    pm.expect(responseData.success).to.be.true;",
+                  "    pm.expect(responseData.data).to.be.an('object');",
+                  "    pm.expect(responseData.data.instagramPost).to.exist;",
+                  "    pm.expect(responseData.data.summary).to.exist;",
+                  "    ",
+                  "    // Check if there's tweet data or a warning",
+                  "    if (responseData.data.tweet) {",
+                  "        pm.expect(responseData.data.tweet.id).to.exist;",
+                  "        pm.expect(responseData.data.tweet.url).to.exist;",
+                  "    } else if (responseData.data.warning) {",
+                  "        console.log(`Warning: ${responseData.data.warning}`);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instagramUsername\": \"{{instagramUsername}}\",\n  \"includeImage\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/process-instagram",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "process-instagram"]
+            },
+            "description": "Executes the complete workflow: fetch Instagram post, summarize it, and post to X.com in a single API call"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
