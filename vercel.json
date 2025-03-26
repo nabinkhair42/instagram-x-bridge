@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "package.json",
+      "src": "src/server.ts",
       "use": "@vercel/node",
       "config": {
         "maxDuration": 60,
@@ -20,8 +20,5 @@
         "Access-Control-Allow-Headers": "*"
       }
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
