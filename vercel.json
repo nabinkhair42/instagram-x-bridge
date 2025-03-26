@@ -20,5 +20,11 @@
         "Access-Control-Allow-Headers": "*"
       }
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "INSTAGRAM_SCRAPING_RETRIES": "3",
+    "INSTAGRAM_RETRY_DELAY": "2000",
+    "DEBUG_SECRET": "@debug_secret_token"
+  }
 }

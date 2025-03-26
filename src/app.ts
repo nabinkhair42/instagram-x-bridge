@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import { env } from './config/env';
 import apiRouter from './routes';
 import homeRouter from './routes/home';
+import debugRouter from './routes/debug';  // Add import for debug routes
 import errorHandler from './middleware/error-handler';
 import { stream } from './utils/logger';
 
@@ -27,6 +28,9 @@ app.use('/', homeRouter);
 
 // API routes
 app.use('/api', apiRouter);
+
+// Debug routes (will check auth internally)
+app.use('/api', debugRouter);
 
 // 404 handler
 app.use((req, res) => {

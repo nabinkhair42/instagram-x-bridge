@@ -13,6 +13,8 @@ export interface InstagramFetchOptions {
 export enum InstagramFetchStrategy {
   WEB_SCRAPING = 'web_scraping',
   GRAPH_API = 'graph_api',
+  CACHE = 'cache',
+  ENHANCED_FALLBACK = 'enhanced_fallback'
 }
 
 export interface InstagramFetchResult {
