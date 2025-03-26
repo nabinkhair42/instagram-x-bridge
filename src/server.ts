@@ -11,6 +11,7 @@ function startDevServer() {
   
   const server = app.listen(PORT, () => {
     logger.info(`⚡️ Server running on port ${PORT} in ${env.NODE_ENV} mode`);
+    logger.info(`Home page: http://localhost:${PORT}`);
     logger.info(`Health check endpoint: http://localhost:${PORT}/health`);
     logger.info(`Instagram API endpoint: http://localhost:${PORT}/api/instagram/latest`);
     logger.info(`Processing endpoint: http://localhost:${PORT}/api/process-instagram`);
