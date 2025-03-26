@@ -9,8 +9,7 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "lint": "eslint . --ext .ts",
-    "vercel-build": "npm run build"
+    "lint": "eslint . --ext .ts"
   },
   "dependencies": {
     "axios": "^1.8.4",
